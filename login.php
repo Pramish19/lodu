@@ -1,3 +1,32 @@
+<?php
+
+
+session_start();
+
+
+
+if (isset($_SESSION['user_id'])) {
+    $user = $_SESSION['user_id'];
+    $username = $_SESSION['username'];
+    $role = $_SESSION['role'];
+}
+
+$isLoggedIn = false;
+
+// isset checks if the variable is set or not
+if (isset($_SESSION['user_id'])) {
+    if ($role === 'admin') {
+        header('Location: admin.php');
+    } else {
+
+        header('Location: index2.php');
+    }
+}
+
+
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,7 +39,7 @@
 
 <body>
     <div class="login-container">
-        
+
         <form id="login-form">
             <h1>Login</h1>
             <label for="email">Email:</label>
@@ -26,7 +55,7 @@
 
     <script src="js/auth.js"></script>
 
-   
+
 </body>
 
 </html>

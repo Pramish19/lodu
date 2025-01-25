@@ -1,4 +1,4 @@
 <?php
 include 'db.php';
-header("Location: qrCode.html");
+header("Location: login.php");
 exit();

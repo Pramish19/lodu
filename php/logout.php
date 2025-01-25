@@ -6,6 +6,5 @@ session_unset();  // session ko sabbai variables like user ko credentials lai re
 session_destroy(); // yeha destroy vayo
 
 // Login page ma redirect garna lai logout vaye paxi
-header("Location: login.html"); // ka redirect hune vane ra yeha define gareko
+header("Location: login.php"); // ka redirect hune vane ra yeha define gareko
 exit();
-?>

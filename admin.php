@@ -1,3 +1,15 @@
+<?php
+session_start();
+$role = $_SESSION['role'];
+
+if ($role !== 'admin') {
+    header('Location: index2.php');
+    exit();
+}
+
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -13,7 +25,7 @@
         <!-- Header Section -->
         <header>
             <h1>Admin Panel</h1>
-            <a href="login.html" class="logout-btn">Logout</a>
+            <a href="logout.php" class="logout-btn">Logout</a>
         </header>
 
         <!-- Main Content -->
@@ -25,14 +37,14 @@
                     <div class="form-group">
                         <label for="category">Category:</label>
                         <select name="category" id="category">
-                          <option value="Foods">Foods</option>
-                          <option value="Soft Drinks">Soft Drinks</option>
-                          <option value="Deserts">Deserts</option>
-                          <option value="Alcohol">Alcohol</option>
-                          <option value="Chef Special">Chef Special</option>
+                            <option value="Foods">Foods</option>
+                            <option value="Soft Drinks">Soft Drinks</option>
+                            <option value="Deserts">Deserts</option>
+                            <option value="Alcohol">Alcohol</option>
+                            <option value="Chef Special">Chef Special</option>
                         </select>
                         <input type="text" id="new-category" name="new-category" placeholder="Add a new category">
-                      </div>
+                    </div>
                     <div class="form-group">
                         <label for="name">Dish Name:</label>
                         <input type="text" id="name" name="dishName" required>
@@ -71,7 +83,7 @@
                 <div id="order-list" class="order-list"></div>
             </section>
 
-            
+
         </main>
     </div>
 

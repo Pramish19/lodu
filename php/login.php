@@ -28,9 +28,9 @@ if ($email && $password) {
 
             //user ko role anusar redirect gareko yo chai
             if ($role === 'admin') {
-                echo json_encode(['success' => true, 'redirect' => 'admin.html']);
+                echo json_encode(['success' => true, 'redirect' => 'admin.php']);
             } else {
-                echo json_encode(['success' => true, 'redirect' => 'index.html']);
+                echo json_encode(['success' => true, 'redirect' => 'index2.php']);
             }
         } else {
             echo json_encode(['success' => false, 'message' => 'Invalid password.']);
@@ -43,4 +43,3 @@ if ($email && $password) {
 } else {
     echo json_encode(['success' => false, 'message' => 'Email and password are required.']);
 }
-?>
