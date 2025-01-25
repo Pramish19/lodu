@@ -20,13 +20,13 @@ INSERT INTO dishes (category, name, description, price) VALUES
 ('Fried Rice', 'Pineapple Fried Rice', 'Fried rice with pineapple, cashews, and choice of meat or tofu.', 12.50);
 
 
-
+u
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    role ENUM('staff', 'admin') NOT NULL
+    role ENUM('customer', 'admin') NOT NULL
 );
 
 

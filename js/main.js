@@ -1,59 +1,53 @@
+// Track tables that have placed orders
+let tablesWithOrders = new Set(); // Added this to keep track of tables with orders
+
 const menuContainer = document.getElementById("menu");
 const orderItems = document.getElementById("order-items");
 const totalElement = document.getElementById("total");
 const tablesContainer = document.getElementById("tables-container");
+const reorderButton = document.createElement("button"); // Reorder button
 
 let order = [];
 let total = 0;
 let selectedTable = null;
 
+// Initialize Reorder Button
+reorderButton.innerText = "Re-order";
+reorderButton.style.display = "none"; // Initially hidden
+reorderButton.addEventListener("click", () => {
+  if (!selectedTable) {
+    alert("Please select a table first.");
+    return;
+  }
+  alert(`You can now reorder for Table ${selectedTable}.`);
+  order = []; // Reset the order for the new session
+  updateOrder(); // Update UI
+});
+document.getElementById("order-summary").appendChild(reorderButton); // Add the reorder button to the page
+
 // Fetch and display menu items
-// fetch("php/menu.php")
-//   .then((response) => response.json())
-//   .then((data) => {
-//     data.forEach((dish) => {
-//       const dishDiv = document.createElement("div");
-//       dishDiv.innerHTML = `
-//             <div class="order-card">
-// <div class="order-description">
-// <h1>${dish.category}</h1>
-// <h3>${dish.name} ($${dish.price})</h3>
-// <p>${dish.description}</p>
-// </div>
-//                 <button onclick="addToOrder(${dish.id}, '${dish.name}', ${dish.price})">Add to Order</button>
-//                 <div>
-//             `;
-//       menuContainer.appendChild(dishDiv);
-//     });
-//   })
-//   .catch((err) => console.error("Error loading menu:", err));
-
-
-
 fetch("php/menu.php")
   .then((response) => response.json())
   .then((data) => {
-    // dishes anusar le group garako category lai
     const groupedDishes = data.reduce((acc, dish) => {
       if (!acc[dish.category]) {
-        acc[dish.category] = []; // category ko lagi array initialize gareko
+        acc[dish.category] = [];
       }
-      acc[dish.category].push(dish); // Aappropriate group anusar dish add gareko
+      acc[dish.category].push(dish);
       return acc;
     }, {});
 
-    //categories ko group anusar chai iterate gare ra render gareko
     Object.keys(groupedDishes).forEach((category) => {
       const categoryDiv = document.createElement("div");
-      categoryDiv.classList.add("category-section"); // csss style ko lagi la
-      categoryDiv.innerHTML = `<h2>${category}</h2>`; // category ko header yeha haleko
+      categoryDiv.classList.add("category-section");
+      categoryDiv.innerHTML = `<h2>${category}</h2>`;
 
       groupedDishes[category].forEach((dish) => {
         const dishDiv = document.createElement("div");
         dishDiv.innerHTML = `
               <div class="order-card">
                   <div class="order-description">
-                      <h3>${dish.name} ($${dish.price})</h3>
+                      <h3>${dish.name} (Rs${dish.price})</h3>
                       <p>${dish.description}</p>
                   </div>
                   <button onclick="addToOrder(${dish.id}, '${dish.name}', ${dish.price})">Add to Order</button>
@@ -62,18 +56,11 @@ fetch("php/menu.php")
         categoryDiv.appendChild(dishDiv);
       });
 
-      //menu ma group append gareko
       menuContainer.appendChild(categoryDiv);
     });
   })
   .catch((err) => console.error("Error loading menu:", err));
 
-
-
-
-
-
-// order ma dish add gareko
 function addToOrder(id, name, price) {
   const existing = order.find((item) => item.id === id);
   if (existing) {
@@ -84,7 +71,17 @@ function addToOrder(id, name, price) {
   updateOrder();
 }
 
-// order gareko summary update gareko
+function subtractFromOrder(id) {
+  const existing = order.find((item) => item.id === id);
+  if (existing) {
+    existing.quantity--;
+    if (existing.quantity === 0) {
+      order = order.filter((item) => item.id !== id);
+    }
+    updateOrder();
+  }
+}
+
 function updateOrder() {
   orderItems.innerHTML = "";
   total = 0;
@@ -97,102 +94,80 @@ function updateOrder() {
     li.innerHTML = `
             <span class="item-name">${item.name}</span>
             <span class="item-quantity">x${item.quantity}</span>
-            <span class="item-price">$${(item.price * item.quantity).toFixed(
+            <span class="item-price">Rs${(item.price * item.quantity).toFixed(
               2
             )}</span>
+            <button class="subtract-btn" onclick="subtractFromOrder(${
+              item.id
+            })">-</button>
         `;
     orderItems.appendChild(li);
   });
 
-  totalElement.innerText = `$${total.toFixed(2)}`;
+  totalElement.innerText = `Rs${total.toFixed(2)}`;
 }
 
-// available vako table load ani display gareko
-// function loadAvailableTables() {
-//   fetch("php/fetchTables.php?status=available")
-//     .then((response) => response.json())
-//     .then((tables) => {
-//       tablesContainer.innerHTML = ""; // existing table lai clear gareko
-
-//       if (tables.length === 0) {
-//         tablesContainer.innerHTML = "<p>No tables available.</p>";
-//         return;
-//       }
-
-//       tables.forEach((table) => {
-//         const tableDiv = document.createElement("div");
-//         tableDiv.classList.add("table");
-//         tableDiv.innerHTML = `
-//                     <p>Table ${table.table_number}</p>
-//                     <button onclick="selectTable(${table.table_number})">Select Table</button>
-//                 `;
-//         tablesContainer.appendChild(tableDiv);
-//       });
-//     })
-//     .catch((err) => console.error("Error loading tables:", err));
-// }
-
-
 function loadTables() {
-    fetch("php/fetchTables.php") // Fetch all tables without filtering by status
-      .then((response) => response.json())
-      .then((tables) => {
-        tablesContainer.innerHTML = ""; // Clear existing table content
-  
-        if (tables.length === 0) {
-          tablesContainer.innerHTML = "<p>No tables found.</p>";
-          return;
-        }
-  
-        // Separate tables by status
-        const availableTables = tables.filter(
-          (table) => table.status === "available"
-        );
-        const occupiedTables = tables.filter(
-          (table) => table.status === "occupied"
-        );
-  
-        // Render available tables
-        const availableSection = document.createElement("div");
-        availableSection.innerHTML = "<h3>Available Tables</h3>";
-        availableTables.forEach((table) => {
-          const tableDiv = document.createElement("div");
-          tableDiv.classList.add("table", "available");
-          tableDiv.innerHTML = `
+  fetch("php/fetchTables.php")
+    .then((response) => response.json())
+    .then((tables) => {
+      tablesContainer.innerHTML = "";
+
+      if (tables.length === 0) {
+        tablesContainer.innerHTML = "<p>No tables found.</p>";
+        return;
+      }
+
+      const availableTables = tables.filter(
+        (table) => table.status === "available"
+      );
+      const occupiedTables = tables.filter(
+        (table) => table.status === "occupied"
+      );
+
+      const availableSection = document.createElement("div");
+      availableSection.innerHTML = "<h3>Available Tables</h3>";
+      availableTables.forEach((table) => {
+        const tableDiv = document.createElement("div");
+        tableDiv.classList.add("table", "available");
+        tableDiv.innerHTML = `
             <p>Table ${table.table_number}</p>
             <button onclick="selectTable(${table.table_number})">Select Table</button>
           `;
-          availableSection.appendChild(tableDiv);
-        });
-  
-        // Render occupied tables
-        const occupiedSection = document.createElement("div");
-        occupiedSection.innerHTML = "<h3>Occupied Tables</h3>";
-        occupiedTables.forEach((table) => {
-          const tableDiv = document.createElement("div");
-          tableDiv.classList.add("table", "occupied");
-          tableDiv.innerHTML = `
+        availableSection.appendChild(tableDiv);
+      });
+
+      const occupiedSection = document.createElement("div");
+      occupiedSection.innerHTML = "<h3>Occupied Tables</h3>";
+      occupiedTables.forEach((table) => {
+        const tableDiv = document.createElement("div");
+        tableDiv.classList.add("table", "occupied");
+        tableDiv.innerHTML = `
             <p>Table ${table.table_number} (Occupied)</p>
             <button disabled>Unavailable</button>
           `;
-          occupiedSection.appendChild(tableDiv);
-        });
-  
-        // Append both sections to the tables container
-        tablesContainer.appendChild(availableSection);
-        tablesContainer.appendChild(occupiedSection);
-      })
-      .catch((err) => console.error("Error loading tables:", err));
-  }
-  
-  // Load tables on page load
-  document.addEventListener("DOMContentLoaded", () => {
-    loadTables();
-  });
-  
+        occupiedSection.appendChild(tableDiv);
+      });
 
-// table select gareko
+      tablesContainer.appendChild(availableSection);
+      tablesContainer.appendChild(occupiedSection);
+    })
+    .catch((err) => console.error("Error loading tables:", err));
+}
+
 function selectTable(tableNumber) {
+  if (selectedTable === tableNumber) {
+    alert(`You are already using Table ${tableNumber}.`);
+    return;
+  }
+
+  if (selectedTable !== null) {
+    alert(
+      "You can select only one table. Please deselect your current table first."
+    );
+    return;
+  }
+
   fetch("php/updateTable.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -200,10 +175,13 @@ function selectTable(tableNumber) {
   })
     .then((response) => response.json())
     .then((data) => {
+      
+      console.log(data);
+
       if (data.success) {
         selectedTable = tableNumber;
         alert(`Table ${tableNumber} selected successfully!`);
-        loadAvailableTables();  //table relode gareko selcet gareko table lai remove garna
+        loadTables();
       } else {
         alert("Failed to update table information.");
       }
@@ -211,7 +189,57 @@ function selectTable(tableNumber) {
     .catch((err) => console.error("Error:", err));
 }
 
-// order place gareko
+// function placeOrder() {
+//   if (!selectedTable) {
+//     alert("Please select a table first.");
+//     return;
+//   }
+
+//   const orderData = {
+//     table: selectedTable,
+//     order: order.map((item) => ({
+//       id: item.id,
+//       quantity: item.quantity,
+//       name: item.name,
+//     })),
+//     total: total,
+//   };
+
+//   fetch("php/order.php", {
+//     method: "POST",
+//     headers: { "Content-Type": "application/json" },
+//     body: JSON.stringify(orderData),
+//   })
+//     .then((response) => {
+//       if (!response.ok) throw new Error("Failed to place order");
+//       return response.json();
+//     })
+//     .then((data) => {
+//       console.log(data);
+//       if (data.success) {
+//         alert("Order placed successfully!");
+
+//         tablesWithOrders.add(selectedTable); // Mark table as having placed an order
+
+//         console.log(tablesWithOrders);
+       
+//         console.log(reorderButton.style.display); // Log the display state of the reorder button
+
+//         reorderButton.style.display = "inline-block"; // Show the reorder button
+//         setTimeout(() => {
+//           reorderButton.style.display = "inline-block"; // Try again after a short delay
+//         }, 100);
+//         order = [];
+//         total = 0;
+//         updateOrder();
+//         loadTables();
+//       } else {
+//         alert(data.message);
+//       }
+//     })
+//     .catch((err) => console.error("Error placing order:", err));
+// }
+
 function placeOrder() {
   if (!selectedTable) {
     alert("Please select a table first.");
@@ -238,8 +266,18 @@ function placeOrder() {
       return response.json();
     })
     .then((data) => {
+      console.log(data); 
+
       if (data.success) {
         alert("Order placed successfully!");
+
+        tablesWithOrders.add(selectedTable); 
+
+         reorderButton.style.display = "inline-block"; 
+        setTimeout(() => {
+          reorderButton.style.display = "inline-block"; 
+        }, 100);
+
         order = [];
         total = 0;
         updateOrder();
@@ -251,6 +289,7 @@ function placeOrder() {
     .catch((err) => console.error("Error placing order:", err));
 }
 
+
 function clearOrder() {
   if (confirm("Are you sure want to reset the order")) {
     order = [];
@@ -261,8 +300,6 @@ function clearOrder() {
   }
 }
 
- //available vako tabels lai forntedn ma load gareko
 document.addEventListener("DOMContentLoaded", () => {
-//   loadAvailableTables();
-loadTables();
+  loadTables();
 });

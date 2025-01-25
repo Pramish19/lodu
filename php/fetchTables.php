@@ -3,7 +3,7 @@ include 'db.php';
 
 $statusFilter = isset($_GET['status']) ? $_GET['status'] : null;
 
-$sql = "SELECT table_number, status FROM `tables`";
+$sql = "SELECT id, table_number, status FROM `tables`";
 if ($statusFilter) {
     $sql .= " WHERE status = ?";
 }

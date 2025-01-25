@@ -46,7 +46,7 @@ function loadMenu() {
 
         const dishDiv = document.createElement("div");
         dishDiv.innerHTML = `
-          <p><li><b>${dish.name}</li></b> <b>$${price.toFixed(2)}</b></p>
+          <p><li><b>${dish.name}</li></b> <b>Rs ${price.toFixed(2)}</b></p>
           <button onclick="deleteDish(${dish.id})">Delete</button>
         `;
         menuList.appendChild(dishDiv);
@@ -75,7 +75,6 @@ function deleteDish(dishId) {
   }
 }
 
-
 // Table Management Section
 function addTable() {
     const tableNumber = parseInt(document.getElementById("table-number").value);
@@ -102,6 +101,27 @@ function addTable() {
       .catch((err) => console.error("Error adding table:", err));
   }
   
+  function deleteTable(tableId) {
+    if (confirm("Are you sure you want to delete this table?")) {
+      fetch("php/deleteTable.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: tableId }),
+      })
+       .then((response) => response.json())
+       .then((data) => {
+          if (data.success) {
+            alert(data.message);
+            loadTableStatuses(); // table status la reload gareko
+          } else {
+            alert(data.message);
+          }
+        })
+       .catch((err) => console.error("Error deleting table:", err));
+    }
+  }
+
+
   function loadTableStatuses() {
     fetch("php/fetchTables.php")
       .then((response) => response.json())
@@ -112,9 +132,10 @@ function addTable() {
         tables.forEach((table) => {
           const tableDiv = document.createElement("div");
           tableDiv.innerHTML = `
-            <p>Table ${table.table}: ${table.status}</p>
-            <button onclick="updateTableStatus(${table.table}, 'available')">Mark as Available</button>
-            <button onclick="updateTableStatus(${table.table}, 'occupied')">Mark as Occupied</button>
+            <p>Table ${table.table_number}: ${table.status}</p>
+            <button onclick="updateTableStatus(${table.table_number}, 'available')">Mark as Available</button>
+            <button onclick="updateTableStatus(${table.table_number}, 'occupied')">Mark as Occupied</button>
+            <button onclick="deleteTable(${table.id})">Delete</button>
           `;
           tableManagement.appendChild(tableDiv);
         });
@@ -135,6 +156,7 @@ function addTable() {
             <p>Table ${table.table_number} - Status: ${table.status}</p>
             <button onclick="updateTableStatus(${table.table_number}, 'available')">Mark as Available</button>
             <button onclick="updateTableStatus(${table.table_number}, 'occupied')">Mark as Occupied</button>
+            <button onclick="deleteTable(${table.id})">Delete</button>
           `;
           tablesContainer.appendChild(tableDiv);
         });
@@ -210,7 +232,7 @@ function addTable() {
                         ${orderItems}
                     </ul>
                     <div class="order-footer">
-                        <p><strong>Total Amount:</strong> $${table.total.toFixed(2)}</p>
+                        <p><strong>Total Amount:</strong> Rs ${table.total.toFixed(2)}</p>
                         <button onclick="clearBill(${table.table})" class="btn">Clear Bill</button>
                     </div>
                     <hr class="order-divider">
@@ -221,25 +243,6 @@ function addTable() {
         .catch((err) => console.error("Error loading orders:", err));
 }
 
-// function clearBill(tableNumber) {
-//   if (confirm(`Are you sure you want to clear the bill for Table ${tableNumber}?`)) {
-//       fetch("php/clearBill.php", {
-//           method: "POST",
-//           headers: { "Content-Type": "application/json" },
-//           body: JSON.stringify({ table_number: tableNumber }),
-//       })
-//           .then((response) => response.json())
-//           .then((data) => {
-//               if (data.success) {
-//                   alert(`Bill for Table ${tableNumber} has been cleared.`);
-//                   loadOrders(); // Refresh the orders list
-//               } else {
-//                   alert(`Error clearing bill: ${data.message}`);
-//               }
-//           })
-//           .catch((err) => console.error(`Error clearing bill for Table ${tableNumber}:`, err));
-//   }
-// }
 
 
 function clearBill(tableNumber) {

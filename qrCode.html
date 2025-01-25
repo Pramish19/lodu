@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Code Generator</title>
+  <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script> 
+  <!-- yo min.js ko library import gariyo -->
+
+
+  <!-- yeha chai qr code ko module call gariyo -->
+  <script src="qrcode.min.js"></script>
+</head>
+<body>
+  <h1>Scan the QR Code to Access the Local Website</h1>
+  <div id="qrcode"></div>
+
+  <script>
+    // Replace this with your local IP and port
+    const localURL = "http://10.10.1.134:8080/login.html";
+    // Generate the QR Code
+    const qrCodeContainer = document.getElementById("qrcode");
+    new QRCode(qrCodeContainer, {
+      text: localURL,
+      width: 200,
+      height: 200,
+    });
+  </script>
+</body>
+</html>

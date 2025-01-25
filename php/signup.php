@@ -9,7 +9,7 @@ $data = json_decode(file_get_contents('php://input'), true);
 $username = $data['username'] ?? '';
 $email = $data['email'] ?? '';
 $password = $data['password'] ?? '';
-$role = $data['role'] ?? 'staff'; // default staff rakehko yedi kunai role select gare na vane
+$role = $data['role'] ?? 'customer'; // default staff rakehko yedi kunai role select gare na vane
 
 // yo chai user ko inputs validate gareko
 if (empty($username) || empty($email) || empty($password) || empty($role)) {
